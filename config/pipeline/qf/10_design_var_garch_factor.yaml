@@ -1,0 +1,60 @@
+name: 10_design_var_garch_factor_test
+
+seed:
+  base: 2026
+  digest_size: 8
+  person: te_net_lib
+  spawn_key: []
+
+lag: 1
+exclude_self: true
+
+dgp:
+  - name: var_garch_factor
+    params:
+      adj_source: ["er"]
+      edge_prob: [0.05]
+      coef_scale: [0.3]
+      k: [3]
+      omega: [2.45e-06]  # Paper value!
+      alpha: [0.08]
+      beta: [0.90]
+      loading_scale: [0.4]
+      burnin: [200]
+
+grid:
+  trials: 3  # Small test
+  N: [50]
+  T: [125, 250]
+
+preprocess:
+  factor_neutral:
+    enabled: true
+    center: true
+    n_components: [0, 3]
+
+te:
+  estimators:
+    - name: ols
+      params:
+        add_intercept: [true]
+    
+    - name: lasso
+      params:
+        add_intercept: [true]
+        standardize: [true]
+        alpha: [0.01]
+        max_iter: [500]
+        tol: [1.0e-8]
+
+graph:
+  select:
+    - name: fixed_density
+      params:
+        density: [0.05]
+        mode: ["abs"]
+        exclude_self: [true]
+
+metrics:
+  hub:
+    k: [5]

@@ -234,6 +234,39 @@ def _generate_one(
                 loading_scale=float(loading_scale),
                 burnin=int(burnin),
             )
+
+        # New: VAR + GARCH + Factor combined
+        elif dgp == "var_garch_factor":
+            adj_source = str(row.get("dgp_adj_source", "er")).strip()
+            if adj_source != "er":
+                raise ValueError(f"unsupported adj_source: {adj_source}")
+            edge_prob = _to_float(row.get("dgp_edge_prob"), "dgp_edge_prob")
+            adj = _adj_er(rng, int(N), float(edge_prob))
+            coef_scale = _to_float(row.get("dgp_coef_scale"), "dgp_coef_scale")
+            k = _to_int(row.get("dgp_k"), "dgp_k")
+            omega = _to_float(row.get("dgp_omega"), "dgp_omega")
+            alpha = _to_float(row.get("dgp_alpha"), "dgp_alpha")
+            beta = _to_float(row.get("dgp_beta"), "dgp_beta")
+            loading_scale = _to_float(row.get("dgp_loading_scale"), "dgp_loading_scale")
+            burnin = _to_int(row.get("dgp_burnin"), "dgp_burnin")
+            
+            from te_net_lib.dgp.var_garch_factor import simulate_var_garch_factor
+            
+            sample = simulate_var_garch_factor(
+                rng=rng,
+                N=int(N),
+                T=int(T),
+                adj=adj,
+                coef_scale=float(coef_scale),
+                k=int(k),
+                omega=float(omega),
+                alpha=float(alpha),
+                beta=float(beta),
+                loading_scale=float(loading_scale),
+                burnin=int(burnin),
+            )
+            spectral_radius = float(sample.extras.get("spectral_radius", 0.0))
+
         else:
             raise ValueError(f"unsupported dgp: {dgp}")
 
